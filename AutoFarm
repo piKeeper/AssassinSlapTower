@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local SelectTarget = ReplicatedStorage.Gameplay.AssassinUI.SelectTarget
-local AssassinChanged = ReplicatedStorage.Gameplay.AssassinUI.AssassinChanged
+local KillFeed = ReplicatedStorage.Gameplay.AssassinUI.KillFeed
 local AssassinClaimedBounty = ReplicatedStorage.Gameplay.AssassinUI.AssassinClaimedBounty
 
 local localPlr = Players.LocalPlayer
@@ -82,7 +82,7 @@ task.spawn(function()
 						end
 					else
 						-- No target → teleport to safe location
-						localHRP.CFrame = CFrame.new(0, 5000, 0)
+						localHRP.CFrame = CFrame.new(0, 1000, 0)
 					end
 				end
 			end
@@ -97,7 +97,7 @@ SelectTarget.OnClientEvent:Connect(function(appearanceId)
 
 	-- Find the player
 	activeTarget = nil
-	task.wait(3) -- wait 3 secs before teleport starts
+	wait(5) -- wait 5 secs before teleport starts
 	for _, player in pairs(Players:GetPlayers()) do
 		if player.UserId == appearanceId then
 			activeTarget = player
@@ -113,9 +113,8 @@ SelectTarget.OnClientEvent:Connect(function(appearanceId)
 end)
 
 -- When target is removed
-AssassinChanged.OnClientEvent:Connect(function(mode, plr)
-	if mode == "Removed" and plr == activeTarget then
-		print("Target removed:", plr.Name)
+KillFeed.OnClientEvent:Connect(function(arg1, arg2)
+	if arg1 == localPlr then
 		activeTarget = nil
 	end
 end)
