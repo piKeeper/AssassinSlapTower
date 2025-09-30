@@ -1,6 +1,5 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 
 local SelectTarget = ReplicatedStorage.Gameplay.AssassinUI.SelectTarget
 local AssassinChanged = ReplicatedStorage.Gameplay.AssassinUI.AssassinChanged
@@ -27,7 +26,7 @@ local toggleButton = Instance.new("TextButton")
 toggleButton.Size = UDim2.new(1, -10, 0, 40)
 toggleButton.Position = UDim2.new(0, 5, 0, 5)
 toggleButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-toggleButton.Text = "Toggle Teleporting"
+toggleButton.Text = "Teleporting: ON"
 toggleButton.TextColor3 = Color3.new(1,1,1)
 toggleButton.Parent = frame
 
@@ -42,7 +41,7 @@ stopButton.Parent = frame
 -- Toggle teleporting on/off
 toggleButton.MouseButton1Click:Connect(function()
 	teleporting = not teleporting
-	print("Teleporting is now", teleporting and "ON" or "OFF")
+	toggleButton.Text = "Teleporting: " .. (teleporting and "ON" or "OFF")
 end)
 
 -- Stop script completely
@@ -64,14 +63,17 @@ task.spawn(function()
 					if activeTarget then
 						local targetChar = activeTarget.Character
 						local targetHRP = targetChar and targetChar:FindFirstChild("HumanoidRootPart")
-						local slapper = localChar:FindFirstChild("Slapper")
-
+						
 						if targetHRP then
 							-- teleport to target
 							localHRP.CFrame = CFrame.new(targetHRP.Position)
 
-							-- activate tool
+							-- auto-equip Slapper tool if it's in Backpack
+							local slapper = localChar:FindFirstChild("Slapper") or localPlr.Backpack:FindFirstChild("Slapper")
 							if slapper and slapper:IsA("Tool") then
+								if slapper.Parent == localPlr.Backpack then
+									slapper.Parent = localChar -- equips tool
+								end
 								slapper:Activate()
 							end
 
