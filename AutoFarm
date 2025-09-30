@@ -6,7 +6,7 @@ local localPlr = game.Players.LocalPlayer
 local activeTarget
 
 SelectTarget.OnClientEvent:Connect(function(appearanceId)
-	print(appearanceId)
+	print(appearanceId, "appId")
 	for _, player in pairs(Players:GetPlayers()) do
 		if player.UserId == appearanceId then
 			activeTarget = player
