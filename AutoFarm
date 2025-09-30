@@ -6,30 +6,32 @@ local localPlr = game.Players.LocalPlayer
 local activeTarget
 
 SelectTarget.OnClientEvent:Connect(function(appearanceId)
-  for _, player in pairs(Players:GetPlayers()) do
+	print(appearanceId)
+	for _, player in pairs(Players:GetPlayers()) do
 		if player.UserId == appearanceId then
-      activeTarget = player
+			activeTarget = player
 		end
 	end
+	print(activeTarget.Name)
 
-  while activeTarget do
-    local targetHRP = activeTarget.Character:FindFirstChild("HumanoidRootPart")
-    local localHRP = localPlr.Character:FindFirstChild("HumanoidRootPart")
+	while activeTarget do
+		local targetHRP = activeTarget.Character:FindFirstChild("HumanoidRootPart")
+		local localHRP = localPlr.Character:FindFirstChild("HumanoidRootPart")
 
-    if targetHRP and localHRP then
-      localHRP.CFrame = CFrame.new(targetHRP.Position)
-      localHRP.Parent.Slapper:Activate()
-    end
+		if targetHRP and localHRP then
+			localHRP.CFrame = CFrame.new(targetHRP.Position)
+			localHRP.Parent.Slapper:Activate()
+		end
     
-    wait(.1)
-    AssassinClaimedBounty:FireServer()
-  end
+		wait(.1)
+    	AssassinClaimedBounty:FireServer()
+	end
 end)
 
 AssassinChanged.OnClientEvent:Connect(function(mode, plr)
-  if mode == "Removed" then
-    if plr == activeTarget then
-      activeTarget = false
-    end
-  end
+	if mode == "Removed" then
+		if plr == activeTarget then
+			activeTarget = false
+		end
+	end
 end)
