@@ -3,8 +3,8 @@ local AssassinChanged = ReplicatedStorage.Gameplay.AssassinUI.AssassinChanged
 local localPlr = game.Players.LocalPlayer
 local activeTarget
 
-AssassinChanged.OnClientEvent:Connect(function(mode, player)
-  print(mode, player)
+AssassinChanged.OnClientEvent:Connect(function(...)
+  print(...)
   if mode == "Added" then
     activeTarget = player
     while activeTarget do
