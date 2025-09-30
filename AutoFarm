@@ -4,6 +4,7 @@ local localPlr = game.Players.LocalPlayer
 local activeTarget
 
 AssassinChanged.OnClientEvent:Connect(function(mode, player)
+  print(mode, player)
   if mode == "Added" then
     activeTarget = player
     while activeTarget do
