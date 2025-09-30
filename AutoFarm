@@ -1,0 +1,21 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local AssassinChanged = ReplicatedStorage.Gameplay.AssassinUI.AssassinChanged
+local localPlr = game.Players.LocalPlayer
+local activeTarget
+
+AssassinChanged.OnClientEvent:Connect(function(mode, player)
+  if mode == "Added" then
+    activeTarget = player
+    while activeTarget do
+      local targetHRP = player.Character:FindFirstChild("HumanoidRootPart")
+      local localHRP = localPlr.Character:FindFirstChild("HumanoidRootPart")
+      if targetHRP and localHRP then
+        localHRP.CFrame = CFrame.new(targetHRP.Position)
+        localHRP.Parent.Slapper:Activate()
+      end
+    wait(.1)
+    end
+  elseif mode == "Removed" then
+    activeTarget = false
+  end
+end)
