@@ -1,22 +1,35 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SelectTarget = ReplicatedStorage.Gameplay.AssassinUI.SelectTarget
 local AssassinChanged = ReplicatedStorage.Gameplay.AssassinUI.AssassinChanged
+local AssassinClaimedBounty = ReplicatedStorage.Gameplay.AssassinUI.AssassinClaimedBounty
 local localPlr = game.Players.LocalPlayer
 local activeTarget
 
-AssassinChanged.OnClientEvent:Connect(function(...)
-  print(...)
-  if mode == "Added" then
-    activeTarget = player
-    while activeTarget do
-      local targetHRP = player.Character:FindFirstChild("HumanoidRootPart")
-      local localHRP = localPlr.Character:FindFirstChild("HumanoidRootPart")
-      if targetHRP and localHRP then
-        localHRP.CFrame = CFrame.new(targetHRP.Position)
-        localHRP.Parent.Slapper:Activate()
-      end
-    wait(.1)
+SelectTarget.OnClientEvent:Connect(function(appearanceId)
+  for _, player in pairs(Players:GetPlayers()) do
+		if player.UserId == appearanceId then
+      activeTarget = player
+		end
+	end
+
+  while activeTarget do
+    local targetHRP = activeTarget.Character:FindFirstChild("HumanoidRootPart")
+    local localHRP = localPlr.Character:FindFirstChild("HumanoidRootPart")
+
+    if targetHRP and localHRP then
+      localHRP.CFrame = CFrame.new(targetHRP.Position)
+      localHRP.Parent.Slapper:Activate()
     end
-  elseif mode == "Removed" then
-    activeTarget = false
+    
+    wait(.1)
+    AssassinClaimedBounty:FireServer()
+  end
+end)
+
+AssassinChanged.OnClientEvent:Connect(function(mode, plr)
+  if mode == "Removed" then
+    if plr == activeTarget then
+      activeTarget = false
+    end
   end
 end)
