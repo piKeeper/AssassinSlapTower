@@ -1,37 +1,119 @@
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+
 local SelectTarget = ReplicatedStorage.Gameplay.AssassinUI.SelectTarget
 local AssassinChanged = ReplicatedStorage.Gameplay.AssassinUI.AssassinChanged
 local AssassinClaimedBounty = ReplicatedStorage.Gameplay.AssassinUI.AssassinClaimedBounty
-local localPlr = game.Players.LocalPlayer
+
+local localPlr = Players.LocalPlayer
 local activeTarget
+local teleporting = true
+local scriptRunning = true
 
-SelectTarget.OnClientEvent:Connect(function(appearanceId)
-	print(appearanceId, "appId")
-	for _, player in pairs(Players:GetPlayers()) do
-		if player.UserId == appearanceId then
-			activeTarget = player
+-- GUI Setup
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = localPlr:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 200, 0, 100)
+frame.Position = UDim2.new(0.5, -100, 0.1, 0)
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+frame.Active = true
+frame.Draggable = true
+frame.Parent = screenGui
+
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(1, -10, 0, 40)
+toggleButton.Position = UDim2.new(0, 5, 0, 5)
+toggleButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+toggleButton.Text = "Toggle Teleporting"
+toggleButton.TextColor3 = Color3.new(1,1,1)
+toggleButton.Parent = frame
+
+local stopButton = Instance.new("TextButton")
+stopButton.Size = UDim2.new(1, -10, 0, 40)
+stopButton.Position = UDim2.new(0, 5, 0, 55)
+stopButton.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+stopButton.Text = "Stop & Delete Script"
+stopButton.TextColor3 = Color3.new(1,1,1)
+stopButton.Parent = frame
+
+-- Toggle teleporting on/off
+toggleButton.MouseButton1Click:Connect(function()
+	teleporting = not teleporting
+	print("Teleporting is now", teleporting and "ON" or "OFF")
+end)
+
+-- Stop script completely
+stopButton.MouseButton1Click:Connect(function()
+	scriptRunning = false
+	screenGui:Destroy()
+	script:Destroy()
+end)
+
+-- Teleport loop
+task.spawn(function()
+	while scriptRunning do
+		if teleporting then
+			local localChar = localPlr.Character
+			if localChar then
+				local localHRP = localChar:FindFirstChild("HumanoidRootPart")
+
+				if localHRP then
+					if activeTarget then
+						local targetChar = activeTarget.Character
+						local targetHRP = targetChar and targetChar:FindFirstChild("HumanoidRootPart")
+						local slapper = localChar:FindFirstChild("Slapper")
+
+						if targetHRP then
+							-- teleport to target
+							localHRP.CFrame = CFrame.new(targetHRP.Position)
+
+							-- activate tool
+							if slapper and slapper:IsA("Tool") then
+								slapper:Activate()
+							end
+
+							-- claim bounty
+							AssassinClaimedBounty:FireServer()
+						end
+					else
+						-- No target → teleport to safe location
+						localHRP.CFrame = CFrame.new(0, 5000, 0)
+					end
+				end
+			end
 		end
-	end
-	print(activeTarget.Name)
-
-	while activeTarget do
-		local targetHRP = activeTarget.Character:FindFirstChild("HumanoidRootPart")
-		local localHRP = localPlr.Character:FindFirstChild("HumanoidRootPart")
-
-		if targetHRP and localHRP then
-			localHRP.CFrame = CFrame.new(targetHRP.Position)
-			localHRP.Parent.Slapper:Activate()
-		end
-    
-		wait(.1)
-    	AssassinClaimedBounty:FireServer()
+		task.wait(0.1)
 	end
 end)
 
-AssassinChanged.OnClientEvent:Connect(function(mode, plr)
-	if mode == "Removed" then
-		if plr == activeTarget then
-			activeTarget = false
+-- When a target is selected
+SelectTarget.OnClientEvent:Connect(function(appearanceId)
+	print("Received appearanceId:", appearanceId)
+
+	-- Find the player
+	activeTarget = nil
+	task.wait(3) -- wait 3 secs before teleport starts
+	for _, player in pairs(Players:GetPlayers()) do
+		if player.UserId == appearanceId then
+			activeTarget = player
+			break
 		end
+	end
+
+	if activeTarget then
+		print("Active target is now:", activeTarget.Name)
+	else
+		warn("No player found with appearanceId:", appearanceId)
+	end
+end)
+
+-- When target is removed
+AssassinChanged.OnClientEvent:Connect(function(mode, plr)
+	if mode == "Removed" and plr == activeTarget then
+		print("Target removed:", plr.Name)
+		activeTarget = nil
 	end
 end)
