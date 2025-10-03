@@ -93,7 +93,7 @@ task.spawn(function()
 						end
 					else
 						-- No target → teleport to safe location
-						localHRP.CFrame = CFrame.new(0, 1000, 0)
+						localHRP.CFrame = CFrame.new(0, 2000, 0)
 					end
 				end
 			end
