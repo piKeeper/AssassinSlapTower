@@ -77,7 +77,7 @@ task.spawn(function()
 
 						if targetHRP then
 							-- teleport to target
-							localHRP.CFrame = CFrame.new(targetHRP.Position)
+							localHRP.Position = Vector3.new(targetHRP.Position)
 
 							-- auto-equip Slapper tool if it's in Backpack
 							local slapper = localChar:FindFirstChild("Slapper") or localPlr.Backpack:FindFirstChild("Slapper")
@@ -96,7 +96,7 @@ task.spawn(function()
 						local randomX = math.random(-2000, 2000)
 						local randomY = math.random(1000, 3000)
 						local randomZ = math.random(-2000, 2000)
-						localHRP.CFrame = CFrame.new(randomX, randomY, randomZ)
+						localHRP.Position = Vector3.new(randomX, randomY, randomZ)
 					end
 				end
 			end
