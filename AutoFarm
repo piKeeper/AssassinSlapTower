@@ -1,3 +1,67 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+
+local SelectTarget = ReplicatedStorage.Gameplay.AssassinUI.SelectTarget
+local KillFeed = ReplicatedStorage.Gameplay.AssassinUI.KillFeed
+local AssassinClaimedBounty = ReplicatedStorage.Gameplay.AssassinUI.AssassinClaimedBounty
+
+local localPlr = Players.LocalPlayer
+local activeTarget
+local teleporting = true
+local scriptRunning = true
+local originalGravity = Workspace.Gravity
+
+-- GUI Setup
+local screenGui = Instance.new("ScreenGui")
+screenGui.ResetOnSpawn = false -- keep GUI after death
+screenGui.Parent = localPlr:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 200, 0, 100)
+frame.Position = UDim2.new(0.5, -100, 0.1, 0)
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+frame.Active = true
+frame.Draggable = true
+frame.Parent = screenGui
+
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(1, -10, 0, 40)
+toggleButton.Position = UDim2.new(0, 5, 0, 5)
+toggleButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+toggleButton.Text = "Teleporting: ON"
+toggleButton.TextColor3 = Color3.new(1,1,1)
+toggleButton.Parent = frame
+
+local stopButton = Instance.new("TextButton")
+stopButton.Size = UDim2.new(1, -10, 0, 40)
+stopButton.Position = UDim2.new(0, 5, 0, 55)
+stopButton.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+stopButton.Text = "Stop & Delete Script"
+stopButton.TextColor3 = Color3.new(1,1,1)
+stopButton.Parent = frame
+
+-- Toggle teleporting on/off
+toggleButton.MouseButton1Click:Connect(function()
+	teleporting = not teleporting
+	toggleButton.Text = "Teleporting: " .. (teleporting and "ON" or "OFF")
+
+	-- set gravity
+	if teleporting then
+		Workspace.Gravity = 0
+	else
+		Workspace.Gravity = originalGravity
+	end
+end)
+
+-- Stop script completely
+stopButton.MouseButton1Click:Connect(function()
+	scriptRunning = false
+	Workspace.Gravity = originalGravity
+	screenGui:Destroy()
+	script:Destroy()
+end)
+
 -- Teleport loop
 task.spawn(function()
 	while scriptRunning do
@@ -38,5 +102,33 @@ task.spawn(function()
 			end
 		end
 		task.wait(0.1)
+	end
+end)
+
+-- When a target is selected
+SelectTarget.OnClientEvent:Connect(function(appearanceId)
+	print("Received appearanceId:", appearanceId)
+
+	-- Find the player
+	activeTarget = nil
+	task.wait(5) -- wait 5 secs before teleport starts
+	for _, player in pairs(Players:GetPlayers()) do
+		if player.UserId == appearanceId then
+			activeTarget = player
+			break
+		end
+	end
+
+	if activeTarget then
+		print("Active target is now:", activeTarget.Name)
+	else
+		warn("No player found with appearanceId:", appearanceId)
+	end
+end)
+
+-- When target is removed
+KillFeed.OnClientEvent:Connect(function(arg1, arg2)
+	if arg1 == localPlr then
+		activeTarget = nil
 	end
 end)
