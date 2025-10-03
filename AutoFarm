@@ -93,9 +93,9 @@ task.spawn(function()
 						end
 					else
 						-- No target → teleport to random safe location
-						local randomX = math.random(-2000, 2000)
-						local randomY = math.random(1000, 3000)
-						local randomZ = math.random(-2000, 2000)
+						local randomX = math.random(-1000, 1000)
+						local randomY = math.random(1000, 2000)
+						local randomZ = math.random(-1000, 1000)
 						localHRP.Position = Vector3.new(randomX, randomY, randomZ)
 					end
 				end
